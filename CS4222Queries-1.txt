@@ -23,8 +23,7 @@ CREATE TABLE GRADSTUDENTS (
 	GENDER VARCHAR(1),
 	DEGREEPRO VARCHAR(10),
 	SASSSN CHAR(9) NOT NULL,
-	PRIMARY KEY  (SSSN),
-   	FOREIGN KEY (SASSSN) REFERENCES GRADSTUDENTS (SSSN),
+   	FOREIGN KEY (SASSSN) REFERENCES GRADSTUDENTS (SSSN)
 );
 
 CREATE TABLE DEPARTMENTS (
@@ -118,6 +117,9 @@ VALUES(78901, 'Rose', 'F', 6, 'Computsci')
 INSERT INTO PROFESSORS
 VALUES(66277, 'Jack', 'F', 7, 'Computsci')
 
+INSERT INTO PROFESSORS
+VALUES (88812, 'May', 'F', 4, 'Engin')
+
 INSERT INTO PROJECTS
 VALUES(1, 'Apple', '1/20/18', '4/19/18', 100000)
 
@@ -190,6 +192,9 @@ VALUES(78901, 4, 'Rose')
 INSERT INTO PROFWORKS
 VALUES(66277, 1, 'Jack')
 
+INSERT INTO PROFWORKS
+VALUES(88812, 3, 'May')
+
 INSERT INTO STUDWORKS
 VALUES(1, 112233, 'Silm')
 
@@ -257,51 +262,56 @@ VALUES(26341, 456)
 3.Functions and Triggers
 
 a.
-CREATE OR REPLACE FUNCTION female_faculty() RETURNS double precision AS $$
-DECLARE female_percent double precision  :=1;
+CREATE OR REPLACE FUNCTION female_faculty() RETURNS DOUBLE PRECISION AS $$
+DECLARE female_percent DOUBLE PRECISION :=1;
 BEGIN
 	female_percent := ((select count(gender) from PROFESSORS where gender = 'F')
 	/ CAST ((select count(*) from PROFESSORS) AS Float)) * 100.00;
 	RETURN female_percent;
 END;
-$$ LANGUAGE plpgsql; 
+$$ LANGUAGE plpgsql;
 
 b.
-CREATE OR REPLACE FUNCTION total_people(pronum) RETURNS integer AS $$
-DECLARE 
-	pno_name ALIAS FOR $1;
-	pno_id INTEGER;
+CREATE OR REPLACE FUNCTION total_people(CHAR(9)) RETURNS integer AS $$
+DECLARE
+	pno ALIAS FOR $1;
+    total INTEGER := 1;
 BEGIN
-	SELECT pronum INTO pno_id FROM PROFWORKS
-		WHERE coinvest = pno_name;
-	RETURN pno_id
+	total := (select count(pinvest) from manages where pronum = pno)
+			+ (select count(coinvest) from profworks where pronum = pno)
+			+ (select count(sssn) from studworks where pronum = pno);
+	RETURN total;
 END;
-$$ LANGUAGE plpgsql; 
+$$ LANGUAGE 'plpgsql';
 
-people_amt integer :=1;
-people_amt := (select count(pronum) from PROFWORKS) +
-			(select count(pronum) from MANAGES) +
-			(select count(pronum) from STUDWORKS);
-			RETURN people_amt;
 
-c.		
+c.
 CREATE TRIGGER faculty_restrict
 BEFORE INSERT OR UPDATE ON PROFWORKS
 FOR EACH ROW EXECUTE PROCEDURE faculty_restrict();
 
 CREATE FUNCTION	faculty_restrict() RETURNS trigger AS $$
-DECLARE num_copi int4 :=1;
+
 BEGIN
-	num_copi = (select count(pronum) from PROFWORKS);
-	IF  num_copi > 4
-	THEN RAISE EXCEPTION 'There are too many co-investigators for this project';
+	IF  (select count(pronum) from PROFWORKS where pronum = '1') >= 4
+	THEN RAISE EXCEPTION 'There are too many co-investigators for this project.';
+	END IF;
+	IF  (select count(pronum) from PROFWORKS where pronum = '2') >= 4
+	THEN RAISE EXCEPTION 'There are too many co-investigators for this project.';
+	END IF;
+	IF  (select count(pronum) from PROFWORKS where pronum = '3') >= 4
+	THEN RAISE EXCEPTION 'There are too many co-investigators for this project.';
+	END IF;
+	IF  (select count(pronum) from PROFWORKS where pronum = '4') >= 4
+	THEN RAISE EXCEPTION 'There are too many co-investigators for this project.';
 	END IF;
 	RETURN NEW;
 END;
-$$ LANGUAGE plpgsql; 
+$$ LANGUAGE plpgsql;
+
 
 INSERT INTO PROFWORKS
-VALUES(67453, 4, 'Laura)
+VALUES(67453, 4, 'Laura')
 
 d.
 CREATE TRIGGER student_restrict

@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-
 public class SQLServer {
 
     private final String url = "jdbc:postgresql://cs1.calstatela.edu:5432/cs4222s18";
@@ -22,14 +21,5 @@ public class SQLServer {
         return conn;
     }
 
-    public SQLServer(){
-
-    }
-
-    public static void main(String[] args) {
-	// write your code here
-        System.out.println("Yo dawg");
-        SQLServer sqlServer = new SQLServer();
-        sqlServer.connect();
-    }
+    public SQLServer() {}
 }
