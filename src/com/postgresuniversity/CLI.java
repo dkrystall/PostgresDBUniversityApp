@@ -10,12 +10,11 @@ import java.util.Scanner;
 
 public class CLI {
     static SQLServer server = new SQLServer();
+    static Connection conn = server.connect();
     public static void main (String args[] ) throws IOException{
         String command = "";
         String selectedCommandInput = "";
         Scanner scanner = new Scanner(System.in);
-        Connection conn = server.connect();
-        
         String[] parts = command.split(" ");
         System.out.println();
         System.out.println("What would you like to do?");
@@ -57,24 +56,25 @@ public class CLI {
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
-                    put(facultyToAdd);
                     break;
 
                 case "2" :
-                    System.out.println("Removing Faculty entity...");
-                    String facultyToDelete = command;
-                    delete(facultyToDelete);
+                    System.out.println("Begin removing faculty entity...");
+                    System.out.println("Enter Professor's pssn");
+                    String facultyID = scanner.nextLine();
+                    //String facultyToDelete = command;
+                    delete("PROFESSORS", facultyID);
                     break;
                 case "3" :
                     System.out.println("Adding Project entity...");
                     String projectToAdd = command;
-                    delete(projectToAdd);
+                    //delete(projectToAdd);
                     break;
 
                 case "4" :
                     System.out.println("Removing Project entity...");
                     String projectToDelete = command;
-                    delete(projectToDelete);
+                    //delete(projectToDelete);
                     break;
 
                 case "5" :
@@ -134,8 +134,19 @@ public class CLI {
     public static void put(String data) {
 
     }
-    public static void delete(String data) {
-
+    public static void delete(String table, String id) {
+        String idLabel;
+        if (table.toUpperCase().equals("PROFESSORS")){
+            idLabel = "pssn";
+        } else {
+            idLabel = "pronum";
+        }
+        try {
+            Statement statement = conn.createStatement();
+            statement.executeUpdate("DELETE FROM "+table+" WHERE "+idLabel+"='"+Integer.valueOf(id)+"'");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
     public static String selectAllFromTable(String table){
         return "Select * FROM "+ table;
